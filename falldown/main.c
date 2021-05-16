@@ -5,6 +5,12 @@
 #include "TileData.h"
 #include "FalldownSprites.h"
 
+// ball struct
+struct Ball {
+    UINT8 x;
+    UINT8 y;
+} ball;
+
 // background mapping
 // 0x0 is a blank tile
 // 0x1 is the wall tile
@@ -281,6 +287,13 @@ void use_inputs(){
         }
         delay(100);
     }
+}
+
+// detects collisions between the sprite and background
+UBYTE is_collision() {
+    UBYTE collision;
+
+    return collision;
 }
 
 void set_background_start(){

@@ -11,6 +11,9 @@ struct Ball {
     UINT8 y;
 } ball;
 
+
+UINT8 PIXEL_MV = 4;
+
 // background mapping
 // 0x0 is a blank tile
 // 0x1 is the wall tile
@@ -172,6 +175,8 @@ When we scroll the screen, what should we keep track of?
     - This is in order to make collision detection later easy to do with simply checks
 */
 
+
+// example of sprites
 void set_sprites(){
     UINT8 currentspriteindex = 40;
 
@@ -203,6 +208,7 @@ void set_sprites(){
     return; 
 }
 
+// example of background
 void set_background(){
     // set the color palette of the background
     set_bkg_palette(0, 1, palettes); 
@@ -225,6 +231,7 @@ void set_background(){
     */
 }
 
+// example of sounds
 void sounds(){
     // press a joypad button for something to happen
     while(1) {
@@ -290,9 +297,20 @@ void use_inputs(){
 }
 
 // detects collisions between the sprite and background
-UBYTE is_collision() {
+UBYTE is_collision(UINT8 ball_x, UINT8 ball_y) {
     UBYTE collision;
+    UINT16 origin_x, origin_y, origin_tile;
 
+    origin_x = (ball_x - 72) / 8;
+    origin_y = (ball_y - 8) / 8;
+    origin_tile = 20 * origin_x + origin_y;
+
+    if (mapping[origin_tile] == 0x01) {
+        move_sprite(0, 88, 78);
+        //printf("collision");
+    }
+
+    
     return collision;
 }
 
@@ -317,7 +335,12 @@ void set_background_start(){
     set_sprite_data(2, 3, ball_squish); // Load the sprites
 
     set_sprite_tile(0,1); // ?
-    move_sprite(0, 88, 78);
+
+    // start ball at center top of viewport
+    move_sprite(0, 80, 16);
+    ball.x = 80;
+    ball.y = 16;
+
     SHOW_SPRITES; 
 
     while(1){
@@ -325,16 +348,20 @@ void set_background_start(){
 
         switch(direction){
             case J_LEFT: // Left joypad
-                scroll_sprite(0, -1, 0);
+                is_collision(ball.x, ball.y);
+                scroll_sprite(0, -PIXEL_MV, 0);
                 break; 
             case J_RIGHT: // Right joypad
-                scroll_sprite(0, 1, 0); 
+                is_collision(ball.x, ball.y);
+                scroll_sprite(0, PIXEL_MV, 0); 
                 break; 
             case J_UP: // Up joypad
-                scroll_sprite(0, 0, -1); 
+                is_collision(ball.x, ball.y);
+                scroll_sprite(0, 0, -PIXEL_MV); 
                 break; 
             case J_DOWN: // Down joypad
-                scroll_sprite(0, 0, 1);
+                is_collision(ball.x, ball.y);
+                scroll_sprite(0, 0, PIXEL_MV);
                 break; 
             case J_START: 
             case J_SELECT: 

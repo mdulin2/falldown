@@ -1,6 +1,7 @@
 #include <gb/gb.h>
 #include <stdio.h>
 #include <rand.h>
+#include <string.h>
 
 #include "TileData.h"
 #include "FalldownSprites.h"
@@ -348,6 +349,41 @@ void move(UINT8 direction) {
     }
 }
 
+/*
+Add a new randomly generated row
+x: X coordinate value
+amount: The perfectage that a blank space should be used
+
+TODO: Make bars consistently thick
+*/
+UINT8 create_row(UINT8 y, UINT8 amount){
+    unsigned char new_row[20];
+    UINT8 value; 
+
+    UINT8 index = 0;
+    while(index < 20){
+        value = rand(); 
+
+        // Add a blank
+        if((rand() % 100) < amount){
+            new_row[index] = 0x0;
+        
+        // Add a wall
+        }else{
+            new_row[index] = 0x1;
+        }
+        
+        index += 1; 
+    }
+
+    // Edit the mapping for 'logic' reasons for collision
+    index = y * 20; 
+    memcpy(&mapping[index], new_row, 20);
+    set_bkg_tiles(0, y, 20, 1, &mapping[index]);
+
+    return 0;
+}
+
 void set_background_start(){
     // load the two palettes for the background
     set_bkg_palette(0, 1, &palettes[4]); 
@@ -371,16 +407,31 @@ void set_background_start(){
     set_sprite_tile(0,1); // ?
 
     // start ball at center top of viewport
-    move_sprite(0, 80, 16);
-    ball.x = 80;
+    move_sprite(0, 100, 16);
+    ball.x = 100;
     ball.y = 16;
 
     SHOW_SPRITES; 
 
+    UINT8 animation = 0;
     while(1){
         UINT8 direction = joypad();
         move(direction);
+
+        // Set the sprite to do a rolling animation
+        set_sprite_tile(0, animation % 2);
+        animation += 1; 
+
+
+        delay(1000);
+        // Add a new randomly generated row to the tile map
+        create_row(animation + 18, 50);
+
+        // Scroll the background 8 pixels at a time (subject to change but works for testing) 
+        scroll_bkg(0,8);
+
         delay(100);
+        animation += 1;
     }
 
     //set_bkg_tiles(32, 32, 8, 1, &mapping[2]);

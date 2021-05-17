@@ -12,7 +12,6 @@ struct Ball {
     UINT8 y;
 } ball;
 
-
 UINT8 PIXEL_MV = 4;
 
 // background mapping
@@ -349,34 +348,32 @@ void move(UINT8 direction) {
     }
 }
 
-/*
-Add a new randomly generated row
-x: X coordinate value
-amount: The perfectage that a blank space should be used
+// add a new randomly generated row
+// y: y coordinate value
+// amount: the percentage that a blank space should be used
 
-TODO: Make bars consistently thick
-*/
+// TODO: Make bars consistently thick
 UINT8 create_row(UINT8 y, UINT8 amount){
-    unsigned char new_row[20];
     UINT8 value; 
-
     UINT8 index = 0;
+    unsigned char new_row[20];
+
     while(index < 20){
         value = rand(); 
 
-        // Add a blank
-        if((rand() % 100) < amount){
+        // add a blank
+        if ((rand() % 100) < amount) {
             new_row[index] = 0x0;
-        
-        // Add a wall
-        }else{
+        }
+        // add a wall
+        else {
             new_row[index] = 0x1;
         }
         
         index += 1; 
     }
 
-    // Edit the mapping for 'logic' reasons for collision
+    // edit the mapping for 'logic' reasons for collision
     index = y * 20; 
     memcpy(&mapping[index], new_row, 20);
     set_bkg_tiles(0, y, 20, 1, &mapping[index]);
@@ -384,7 +381,8 @@ UINT8 create_row(UINT8 y, UINT8 amount){
     return 0;
 }
 
-void set_background_start(){
+// initializes the palettes and sprites
+void initialize(){
     // load the two palettes for the background
     set_bkg_palette(0, 1, &palettes[4]); 
 
@@ -395,16 +393,16 @@ void set_background_start(){
     // load the background 'image' to location mapping
     set_bkg_tiles(0, 0, 20, 32, mapping);
 
-    delay(1000);
-
+    // load the palette for the sprite
     set_sprite_palette(0, 1, palettes); 
 
     // loading sprite information
-    set_sprite_data(0, 1, ball_straight); // Load the sprites
-    set_sprite_data(1, 2, ball_rotate); // Load the sprites
-    set_sprite_data(2, 3, ball_squish); // Load the sprites
+    set_sprite_data(0, 1, ball_straight); // load the sprites
+    set_sprite_data(1, 2, ball_rotate); // load the sprites
+    set_sprite_data(2, 3, ball_squish); // load the sprites
 
-    set_sprite_tile(0,1); // ?
+    // load the sprite 'image'
+    set_sprite_tile(0,1);
 
     // start ball at center top of viewport
     move_sprite(0, 100, 16);
@@ -412,25 +410,26 @@ void set_background_start(){
     ball.y = 16;
 
     SHOW_SPRITES; 
+}
 
+void main(){
     UINT8 animation = 0;
+    initialize();
+
     while(1){
         UINT8 direction = joypad();
         move(direction);
 
-        // Set the sprite to do a rolling animation
+        // set the ball to perform a rolling animation
         set_sprite_tile(0, animation % 2);
-        animation += 1; 
 
-
-        delay(1000);
-        // Add a new randomly generated row to the tile map
+        // add a new randomly generated row to the tile map
         create_row(animation + 18, 50);
 
-        // Scroll the background 8 pixels at a time (subject to change but works for testing) 
+        // scroll the background 8 pixels at a time
         scroll_bkg(0,8);
 
-        delay(100);
+        delay(1000);
         animation += 1;
     }
 
@@ -440,11 +439,4 @@ void set_background_start(){
         set_bkg_tiles(rand() % 20, rand() % 20, 1, 1, mapping);
         delay(100);
     }
-}
-
-void main(){
-    //set_sprites();
-    //set_background();
-    //use_inputs();
-    set_background_start();
 }

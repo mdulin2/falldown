@@ -298,20 +298,54 @@ void use_inputs(){
 
 // detects collisions between the sprite and background
 UBYTE is_collision(UINT8 ball_x, UINT8 ball_y) {
-    UBYTE collision;
+    UBYTE collision = 0;
     UINT16 origin_x, origin_y, origin_tile;
 
-    origin_x = (ball_x - 72) / 8;
-    origin_y = (ball_y - 8) / 8;
-    origin_tile = 20 * origin_x + origin_y;
+    origin_x = (ball_x - 8) / 8;
+    origin_y = (ball_y - 16) / 8;
+    origin_tile = 20 * origin_y + origin_x;
 
     if (mapping[origin_tile] == 0x01) {
-        move_sprite(0, 88, 78);
-        //printf("collision");
+        collision = 1;
     }
 
-    
     return collision;
+}
+
+// handles ball movement
+void move(UINT8 direction) {
+    switch(direction){
+        case J_LEFT: // left joypad
+            if (is_collision(ball.x - 4, ball.y) == 0) {
+                scroll_sprite(0, -PIXEL_MV, 0);
+                ball.x = ball.x - 4;
+            }
+            break; 
+        case J_RIGHT: // right joypad
+            // TODO: ball.x + 8 bc overlap
+            if (is_collision(ball.x + 4, ball.y) == 0) {
+                scroll_sprite(0, PIXEL_MV, 0);
+                ball.x = ball.x + 4;
+            }
+            break; 
+        case J_UP: // up joypad
+            if (is_collision(ball.x, ball.y - 4) == 0) {
+                scroll_sprite(0, 0, -PIXEL_MV);
+                ball.y = ball.y - 4;
+            }
+            break; 
+        case J_DOWN: // down joypad
+            if (is_collision(ball.x, ball.y + 4) == 0) {
+                scroll_sprite(0, 0, PIXEL_MV);
+                ball.y = ball.y + 4;
+            }
+            break; 
+        case J_START: 
+        case J_SELECT: 
+        case J_A:
+        case J_B: 
+            break; 
+    }
 }
 
 void set_background_start(){
@@ -345,32 +379,7 @@ void set_background_start(){
 
     while(1){
         UINT8 direction = joypad();
-
-        switch(direction){
-            case J_LEFT: // Left joypad
-                is_collision(ball.x, ball.y);
-                scroll_sprite(0, -PIXEL_MV, 0);
-                break; 
-            case J_RIGHT: // Right joypad
-                is_collision(ball.x, ball.y);
-                scroll_sprite(0, PIXEL_MV, 0); 
-                break; 
-            case J_UP: // Up joypad
-                is_collision(ball.x, ball.y);
-                scroll_sprite(0, 0, -PIXEL_MV); 
-                break; 
-            case J_DOWN: // Down joypad
-                is_collision(ball.x, ball.y);
-                scroll_sprite(0, 0, PIXEL_MV);
-                break; 
-            case J_START: 
-            case J_SELECT: 
-            case J_A: 
-                scroll_sprite(0, 10, 10);
-                break;
-            case J_B: 
-                break; 
-        }
+        move(direction);
         delay(100);
     }
 
